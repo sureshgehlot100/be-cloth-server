@@ -12,7 +12,30 @@ const app = express();
 connectDB();
 
 // middleware
-app.use(cors());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,   // production frontend
+  "http://localhost:3000"     // local dev
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin like mobile apps or curl
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true
+  })
+);
+
+// preflight requests fix
+app.options("*", cors());
+
 
 // ⚠️ Stripe webhook should be BEFORE express.json()
 // (jab webhook enable karoge tab)
