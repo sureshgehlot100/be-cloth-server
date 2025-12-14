@@ -12,14 +12,16 @@ const app = express();
 connectDB();
 
 // middleware
-app.use(cors()); //  CORS added
+app.use(cors());
 
-// ⚠️ Stripe webhook FIRST
-// app.post(
-//   '/api/webhook',
-//   bodyParser.raw({ type: 'application/json' }),
-//   require('./src/webhooks/stripeWebhook')
-// )
+// ⚠️ Stripe webhook should be BEFORE express.json()
+// (jab webhook enable karoge tab)
+/// app.post(
+//   "/api/webhook",
+//   express.raw({ type: "application/json" }),
+//   require("./src/webhooks/stripeWebhook")
+// );
+
 app.use(express.json());
 
 // routes
@@ -28,11 +30,11 @@ app.use("/api/products", require("./src/routes/product"));
 
 // test route
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.send("API is running on Vercel 🚀");
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+/**
+ * ❌ REMOVE app.listen
+ * ✅ EXPORT app
+ */
+module.exports = app;
