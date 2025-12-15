@@ -13,8 +13,7 @@ connectDB();
 
 // middleware
 const allowedOrigins = [
-  process.env.FRONTEND_URL,   // production frontend
-  "http://localhost:3000"     // local dev
+  process.env.FRONTEND_URL,   // production fronten
 ];
 
 app.use(
@@ -34,7 +33,7 @@ app.use(
 );
 
 // preflight requests fix
-app.options("*", cors());
+// app.options("*", cors());
 
 
 // ⚠️ Stripe webhook should be BEFORE express.json()
