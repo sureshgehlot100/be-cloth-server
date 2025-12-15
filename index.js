@@ -32,17 +32,15 @@ app.use(
   })
 );
 
-// preflight requests fix
-// app.options("*", cors());
 
 
 // ⚠️ Stripe webhook should be BEFORE express.json()
 // (jab webhook enable karoge tab)
-/// app.post(
-//   "/api/webhook",
-//   express.raw({ type: "application/json" }),
-//   require("./src/webhooks/stripeWebhook")
-// );
+app.post(
+  "/api/webhook",
+  express.raw({ type: "application/json" }),
+  require("./src/webhooks/stripeWebhook")
+);
 
 app.use(express.json());
 
