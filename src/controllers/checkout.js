@@ -12,7 +12,7 @@ const checkoutsession = async (req, res) => {
 
     // ✅ Fetch products from DB (price source of truth)
     const products = await Product.find({
-      _id: { $in: cartItems.map(item => item.productId) }
+      _id: { $in: cartItems.map((item) => item.productId) },
     });
 
     console.log(products);
@@ -23,10 +23,8 @@ const checkoutsession = async (req, res) => {
     }
 
     // ✅ Create Stripe line items
-    const line_items = cartItems.map(item => {
-      const product = products.find(
-        p => p._id.toString() === item.productId
-      );
+    const line_items = cartItems.map((item) => {
+      const product = products.find((p) => p._id.toString() === item.productId);
 
       return {
         price_data: {
@@ -41,20 +39,22 @@ const checkoutsession = async (req, res) => {
       };
     });
 
-    // ✅ Create Stripe Checkout Session
+    // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       line_items,
       success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/payment/failed`,
+      metadata: {
+        cartItems: JSON.stringify(cartItems), // ⭐ THIS IS REQUIRED
+      },
     });
 
-    // ✅ Send Stripe URL to frontend
+    //  Send Stripe URL to frontend
     res.status(200).json({
       url: session.url,
     });
-
   } catch (error) {
     console.error("Checkout Error:", error);
     res.status(500).json({
@@ -64,31 +64,24 @@ const checkoutsession = async (req, res) => {
 };
 
 const verifypayment = async (req, res) => {
-    try {
-    const { session_id } = req.query
-   console.log(session_id);
+  try {
+    const { session_id } = req.query;
+
     if (!session_id) {
-      return res.status(400).json({ success: false })
+      return res.status(400).json({ success: false });
     }
 
-    const session = await stripe.checkout.sessions.retrieve(session_id)
+    const session = await stripe.checkout.sessions.retrieve(session_id);
 
-    if (session.payment_status === 'paid') {
-      return res.json({
-        success: true,
-        session
-      })
-        // IMPORTANT
-      metadata: {
-        cartItems: JSON.stringify(cartItems)
-      }
+    if (session.payment_status === "paid") {
+      return res.json({ success: true });
     }
 
-    res.json({ success: false })
+    res.json({ success: false });
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ success: false })
+    console.error(error);
+    res.status(500).json({ success: false });
   }
-}
+};
 
 module.exports = { checkoutsession, verifypayment };
