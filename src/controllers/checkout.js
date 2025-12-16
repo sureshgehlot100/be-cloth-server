@@ -78,10 +78,10 @@ const verifypayment = async (req, res) => {
         success: true,
         session
       })
-       //  IMPORTANT
-    //   metadata: {
-    //     cartItems: JSON.stringify(cartItems)
-    //   }
+        // IMPORTANT
+      metadata: {
+        cartItems: JSON.stringify(cartItems)
+      }
     }
 
     res.json({ success: false })
