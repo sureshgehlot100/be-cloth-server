@@ -18,24 +18,58 @@ module.exports = async (req, res) => {
     return res.status(400).send('Webhook Error')
   }
 
+  console.log('✅ Received Stripe event:', event.type)
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
 
-    try {
-      const exists = await Order.findOne({
-        stripeSessionId: session.id
-      })
-
-      if (!exists) {
-        await Order.create({
-          stripeSessionId: session.id,
-          amount: session.amount_total / 100,
-          currency: session.currency,
-          paymentStatus: session.payment_status,
-          items: JSON.parse(session.metadata.cartItems),
-          customerEmail: session.customer_details.email
-        })
+    // Helpful debug: log session summary (avoid logging sensitive card data)
+    console.log('Webhook session:', {
+      id: session.id,
+      amount_total: session.amount_total,
+      currency: session.currency,
+      payment_status: session.payment_status,
+      metadata: session.metadata,
+      customer_details: session.customer_details && {
+        email: session.customer_details.email
       }
+    })
+
+    try {
+      if (!session.id) {
+        console.error('Missing session.id — skipping order creation')
+        return res.status(400).send('Missing session id')
+      }
+
+      const exists = await Order.findOne({ stripeSessionId: session.id })
+
+      if (exists) {
+        console.log('Order already exists for session:', session.id)
+        return res.json({ received: true })
+      }
+
+      // Safely parse metadata.cartItems
+      let items = []
+      if (session.metadata && session.metadata.cartItems) {
+        try {
+          items = JSON.parse(session.metadata.cartItems)
+        } catch (parseErr) {
+          console.error('Failed to parse session.metadata.cartItems:', parseErr)
+          items = []
+        }
+      }
+
+      const orderData = {
+        stripeSessionId: session.id,
+        amount: session.amount_total ? session.amount_total / 100 : undefined,
+        currency: session.currency,
+        paymentStatus: session.payment_status,
+        items,
+        customerEmail: session.customer_details && session.customer_details.email
+      }
+
+      await Order.create(orderData)
+      console.log('Order saved for session:', session.id)
     } catch (err) {
       console.error('Order save failed:', err)
     }

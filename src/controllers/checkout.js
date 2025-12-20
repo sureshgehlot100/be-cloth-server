@@ -4,7 +4,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const checkoutsession = async (req, res) => {
   try {
     const { cartItems } = req.body;
-    console.log(cartItems);
+   
     // ❌ Validation
     if (!cartItems || !cartItems.length) {
       return res.status(400).json({ message: "Cart is empty" });
@@ -15,7 +15,7 @@ const checkoutsession = async (req, res) => {
       _id: { $in: cartItems.map((item) => item.productId) },
     });
 
-    console.log(products);
+   
 
     // ❌ If product mismatch
     if (products.length !== cartItems.length) {
