@@ -5,9 +5,20 @@ const Order = require('../models/Order');
 
 module.exports = async (req, res) => {
   const sig = req.headers['stripe-signature'];
-  console.log('content-type:', req.headers['content-type']);
-  console.log('stripe-signature present:', !!sig);
-  console.log('isBuffer:', Buffer.isBuffer(req.body), 'typeof', typeof req.body);
+  // Debug: log presence and small preview of raw body and signature
+  try {
+    console.log('content-type:', req.headers['content-type']);
+    console.log('stripe-signature present:', !!sig);
+    if (req.body && Buffer.isBuffer(req.body)) {
+      console.log('raw body length:', req.body.length);
+      console.log('raw body preview:', req.body.toString('utf8').slice(0, 1000));
+    } else {
+      console.log('req.body is not a Buffer, typeof:', typeof req.body);
+    }
+    console.log('STRIPE_WEBHOOK_SECRET set:', !!process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (dbgErr) {
+    console.error('Debug log failed:', dbgErr);
+  }
 
   if (!sig) {
     console.error('No stripe-signature header present');
