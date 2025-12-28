@@ -47,6 +47,7 @@ app.use(express.json());
 app.use("/api/checkout", require("./src/routes/checkout"));
 app.use("/api/products", require("./src/routes/product"));
 app.use("/api/auth", require("./src/routes/user"));
+app.use("/api/address", require("./src/routes/address"));
 
 // test route
 app.get("/", (req, res) => {
