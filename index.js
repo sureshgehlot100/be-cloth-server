@@ -13,7 +13,7 @@ connectDB();
 
 // middleware
 const allowedOrigins = [
-  process.env.FRONTEND_URL,   // production frontend
+  process.env.FRONTEND_URL, // production frontend
   // 'http://localhost:3000',
 ];
 
@@ -29,11 +29,9 @@ app.use(
       return callback(null, true);
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true
+    credentials: true,
   })
 );
-
-
 
 // ⚠️ Stripe webhook should be BEFORE express.json()
 // (jab webhook enable karoge tab)
@@ -48,6 +46,7 @@ app.use(express.json());
 // routes
 app.use("/api/checkout", require("./src/routes/checkout"));
 app.use("/api/products", require("./src/routes/product"));
+app.use("/api/auth", require("./src/routes/user"));
 
 // test route
 app.get("/", (req, res) => {

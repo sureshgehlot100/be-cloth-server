@@ -6,7 +6,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const checkoutsession = async (req, res) => {
   try {
     const { cartItems } = req.body;
-    console.log('🛒 Checkout request cartItems:', cartItems);
+    
 
     if (!cartItems || !cartItems.length) {
       return res.status(400).json({ message: 'Cart is empty' });
