@@ -14,7 +14,7 @@ connectDB();
 // middleware
 const allowedOrigins = [
   process.env.FRONTEND_URL, // production frontend
-  // 'http://localhost:3000',
+  'http://localhost:3000',
 ];
 
 app.use(
@@ -48,6 +48,7 @@ app.use("/api/checkout", require("./src/routes/checkout"));
 app.use("/api/products", require("./src/routes/product"));
 app.use("/api/auth", require("./src/routes/user"));
 app.use("/api/address", require("./src/routes/address"));
+app.use('/api/order', require("./src/routes/order"));
 
 // test route
 app.get("/", (req, res) => {
@@ -58,7 +59,7 @@ app.get("/", (req, res) => {
  * ❌ REMOVE app.listen
  * ✅ EXPORT app
  */
-// app.listen(5000, () => {
-//   console.log(`Server listening on http://localhost:5000`);
-// });
+app.listen(5000, () => {
+  console.log(`Server listening on http://localhost:5000`);
+});
 module.exports = app;

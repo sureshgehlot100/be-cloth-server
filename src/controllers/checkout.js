@@ -1,6 +1,7 @@
 // src/controllers/checkout.js
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const Address = require('../models/Address');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const checkoutsession = async (req, res) => {
@@ -36,14 +37,43 @@ const checkoutsession = async (req, res) => {
     const amount = normalizedItems.reduce((acc, it) => acc + it.price * it.quantity, 0);
     const currency = 'gbp';
 
-    // Create order draft in DB (pending)
+    // Determine address: prefer provided addressId, otherwise use user's saved address
+    let addressId = req.body.addressId || null;
+    let addressDoc = null;
+    if (addressId) {
+      addressDoc = await Address.findById(addressId);
+      if (!addressDoc) addressId = null;
+    }
+    if (!addressId && req.user) {
+      addressDoc = await Address.findOne({ user: req.user._id });
+      if (addressDoc) addressId = addressDoc._id;
+    }
+
+    const shippingSnapshot = addressDoc
+      ? {
+          fullName: addressDoc.fullName,
+          phone: addressDoc.phone,
+          addressLine1: addressDoc.addressLine1,
+          addressLine2: addressDoc.addressLine2,
+          city: addressDoc.city,
+          state: addressDoc.state,
+          postalCode: addressDoc.postalCode,
+          country: addressDoc.country
+        }
+      : null;
+
+    // Create order draft in DB (pending) with shipping snapshot and user email
     const orderDraft = await Order.create({
       orderRef: undefined,
       amount,
       currency,
       paymentStatus: 'PENDING',
       orderStatus: 'PENDING',
-      items: normalizedItems
+      items: normalizedItems,
+      user: req.user?._id || null,
+      address: addressId || null,
+      shipping: shippingSnapshot,
+      customerEmail: req.user?.email || null
     });
 
     // Save orderRef = string of _id for convenience
@@ -61,6 +91,7 @@ const checkoutsession = async (req, res) => {
     }));
 
     // Create Checkout Session with only orderId metadata (tiny)
+    console.log('Creating checkout session, req.user:', req.user && req.user._id);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -68,7 +99,8 @@ const checkoutsession = async (req, res) => {
       success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/payment/failed`,
       metadata: {
-        orderId: orderDraft._id.toString()
+        orderId: orderDraft._id.toString(),
+        userId: req.user._id.toString()
       }
     });
 

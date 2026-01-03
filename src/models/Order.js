@@ -10,16 +10,50 @@ const orderItemSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   stripeSessionId: { type: String, unique: true, sparse: true },
-  orderRef: { type: String, index: true }, // our local order id string (same as _id)
+  orderRef: { type: String, index: true },
+
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  },
+
+  address: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Address",
+    default: null
+  },
+
+  // snapshot of shipping address at time of order creation
+  shipping: {
+    fullName: String,
+    phone: String,
+    addressLine1: String,
+    addressLine2: String,
+    city: String,
+    state: String,
+    postalCode: String,
+    country: String
+  },
+
   amount: Number,
   currency: String,
-  paymentStatus: String,     // paid / unpaid / pending
-  orderStatus: {             // business status
+
+  paymentStatus: {
     type: String,
-    default: 'PENDING'       // PENDING -> PLACED -> SHIPPED -> DELIVERED etc.
+    enum: ["PAID", "UNPAID", "PENDING"],
+    default: "PENDING"
   },
+
+  orderStatus: {
+    type: String,
+    enum: ["PENDING", "PLACED", "SHIPPED", "DELIVERED", "CANCELLED"],
+    default: "PENDING"
+  },
+
   customerEmail: String,
   items: { type: [orderItemSchema], default: [] }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

@@ -3,7 +3,7 @@ const Address = require("../models/Address");
 const createAddress = async (req, res) => {
    
   try {
-    console.log("kyu",req.body);
+    
     const address = await Address.create({
       ...req.body,
       user: req.user._id,
