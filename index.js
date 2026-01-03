@@ -14,7 +14,7 @@ connectDB();
 // middleware
 const allowedOrigins = [
   process.env.FRONTEND_URL, // production frontend
-  'http://localhost:3000',
+  // 'http://localhost:3000',
 ];
 
 app.use(
@@ -59,7 +59,7 @@ app.get("/", (req, res) => {
  * ❌ REMOVE app.listen
  * ✅ EXPORT app
  */
-app.listen(5000, () => {
-  console.log(`Server listening on http://localhost:5000`);
-});
+// app.listen(5000, () => {
+//   console.log(`Server listening on http://localhost:5000`);
+// });
 module.exports = app;
