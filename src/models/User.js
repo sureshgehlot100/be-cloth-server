@@ -7,6 +7,15 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     phone: { type: String },
     password: { type: String, required: true },
+    deviceTokens: [
+      {
+        token: { type: String, required: true },
+        deviceType: { type: String },
+        osName: { type: String },
+        osVersion: { type: String },
+        addedAt: { type: Date, default: Date.now }
+      }
+    ],
   },
   { timestamps: true }
 );

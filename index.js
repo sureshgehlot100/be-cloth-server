@@ -49,6 +49,7 @@ app.use("/api/products", require("./src/routes/product"));
 app.use("/api/auth", require("./src/routes/user"));
 app.use("/api/address", require("./src/routes/address"));
 app.use('/api/order', require("./src/routes/order"));
+app.use("/api/push-token", require("./src/routes/notification"));
 
 // test route
 app.get("/", (req, res) => {
